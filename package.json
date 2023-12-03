@@ -1,0 +1,8 @@
+{
+  "name": "PytaniaBaza",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "pdfjs-dist": "^4.0.269"
+  }
+}
