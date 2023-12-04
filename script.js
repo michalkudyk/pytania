@@ -1,43 +1,48 @@
-import pdfjsLib from './node_modules/pdfjs-dist/build/pdf';
-
-const lokalnyPdfPath = './resources/LEK-choroby_wewnętrzne.pdf';
-
-async function pobierzPytaniaZLokalnegoPDF() {
+async function getQuestionsFromPDF(pdfPath) {
   try {
-    const loadingTask = pdfjsLib.getDocument(lokalnyPdfPath);
+    const loadingTask = pdfjsLib.getDocument(pdfPath);
     const pdf = await loadingTask.promise;
+    const questions = [];
 
-    const liczbaStron = pdf.numPages;
+    const numPages = pdf.numPages;
 
-    const pytania = [];
+    for (let pageNumber = 1; pageNumber <= numPages; pageNumber++) {
+      const page = await pdf.getPage(pageNumber);
+      const textContent = await page.getTextContent();
+      const pageQuestions = textContent.items
+        .map(item => item.str)
+        .filter(text => text.toLowerCase().startsWith('pytanie nr'));
 
-    for (let strona = 1; strona <= liczbaStron; strona++) {
-      const page = await pdf.getPage(strona);
-      const tekstStrony = await page.getTextContent();
-
-      const tekstStronyPelny = tekstStrony.items.map(item => item.str).join('\n');
-
-      const pytanieRegex = /Pytanie nr.*?(?=Pytanie nr|\n|$)/gs;
-      let match;
-      while ((match = pytanieRegex.exec(tekstStronyPelny)) !== null) {
-        pytania.push(match[0]);
-      }
+      questions.push(...pageQuestions);
     }
 
-    return pytania;
+    return questions;
   } catch (error) {
-    console.error('Błąd podczas pobierania pytań z lokalnego pliku PDF:', error);
+    console.error('Błąd podczas pobierania pytań z pliku PDF:', error);
     return [];
   }
 }
 
-pobierzPytaniaZLokalnegoPDF()
-  .then(pytania => {
-    console.log('Pobrane pytania:', pytania);
-  })
-  .catch(error => {
-    console.error('Wystąpił błąd:', error);
-  });
+async function displayQuestions() {
+  const pdfPath = 'sciezka/do/twojego/pliku.pdf'; 
+  const questions = await getQuestionsFromPDF(pdfPath);
 
-let pytania = pobierzPytaniaZLokalnegoPDF();
-console.log(pytania)
+  const questionsContainer = document.getElementById('questions-container');
+
+  questions.forEach((question, index) => {
+    const div = document.createElement('div');
+    div.className = 'question';
+    div.textContent = question;
+    questionsContainer.appendChild(div);
+
+    setTimeout(() => {
+      div.style.display = 'block';
+
+      setTimeout(() => {
+        div.style.display = 'none';
+      }, 20000 * (index + 1)); 
+    }, 20000 * index); 
+  });
+}
+
+displayQuestions();
