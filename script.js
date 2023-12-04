@@ -24,7 +24,7 @@ async function getQuestionsFromPDF(pdfPath) {
 }
 
 async function displayQuestions() {
-  const pdfPath = 'sciezka/do/twojego/pliku.pdf'; 
+  const pdfPath = './resources/LEK-choroby_wewnętrzne.pdf'; 
   const questions = await getQuestionsFromPDF(pdfPath);
 
   const questionsContainer = document.getElementById('questions-container');
